@@ -1,4 +1,4 @@
-# app-source-space-v2
+# source-space
 
 Compute a surface-based source space from a FreeSurfer reconstruction.
 
@@ -14,7 +14,7 @@ The source space defines the candidate source locations on the cortical surface.
 
 | Datatype | File | Description |
 |----------|------|-------------|
-| `neuro/source-space` | `source_space-src.fif` | Source space (consumed by app-forward-v2) |
+| `neuro/source-space` | `source_space-src.fif` | Source space (consumed by forward app) |
 | `report/html` | `report.html` | Interactive MRI slider with source points overlaid |
 
 ## Parameters
