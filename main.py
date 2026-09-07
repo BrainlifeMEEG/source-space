@@ -2,7 +2,7 @@
 app-source-space-v2: Compute surface-based source space from FreeSurfer output.
 
 Inputs : FreeSurfer subject directory (from recon-all).
-Outputs: source_space-src.fif (candidate source locations on cortical surface).
+Outputs: src.fif (candidate source locations on cortical surface).
 """
 
 import os
@@ -38,7 +38,7 @@ import matplotlib.pyplot as plt
 import mne
 
 # == SETUP ==
-ensure_output_dirs('out_dir', 'out_figs', 'out_dir_report')
+ensure_output_dirs('out_dir', 'out_figs', 'out_report')
 report_items = []
 
 # == LOAD CONFIG ==
@@ -92,7 +92,7 @@ try:
     spacing = int(spacing_raw)
 except (ValueError, TypeError):
     spacing = spacing_raw  # keep as string ('oct6', 'ico5', etc.)
-surface = 'white'
+surface = config.get('surface') or 'white'
 
 # add_dist: False = no distance/patch info (fastest, avoids scikit-learn)
 #           'patch' = patch info only (needs SciPy >=1.3, recommended)
@@ -134,7 +134,7 @@ except Exception as e:
     sys.exit(1)
 
 # == SAVE SOURCE SPACE ==
-src_path = os.path.join('out_dir', 'source_space-src.fif')
+src_path = os.path.join('out_dir', 'src.fif')
 try:
     mne.write_source_spaces(src_path, src, overwrite=True)
     add_info_to_product(report_items, f"Saved: {src_path}", "info")
@@ -148,18 +148,6 @@ _brain_surfaces = "white"
 if not os.path.isfile(os.path.join(subjects_dir, subject, 'surf', 'lh.white')):
     _brain_surfaces = None
 
-def _crop_middle_slice(fig):
-    axes = fig.axes
-    mid_ax = axes[len(axes) // 2]
-    fig.canvas.draw()
-    buf = fig.canvas.buffer_rgba()
-    full_img = np.asarray(buf)[..., :3]
-    bbox = mid_ax.get_position()
-    h, w = full_img.shape[:2]
-    x0, x1 = int(bbox.x0 * w), int(bbox.x1 * w)
-    y0, y1 = int((1 - bbox.y1) * h), int((1 - bbox.y0) * h)
-    return full_img[y0:y1, x0:x1]
-
 slices = {}
 for orientation in ('coronal', 'axial', 'sagittal'):
     try:
@@ -169,7 +157,17 @@ for orientation in ('coronal', 'axial', 'sagittal'):
             src=src,
             orientation=orientation, show=False
         )
-        slices[orientation] = _crop_middle_slice(fig)
+        # Crop out the middle subplot, render as RGB array
+        axes = fig.axes
+        mid_ax = axes[len(axes) // 2]
+        fig.canvas.draw()
+        buf = fig.canvas.buffer_rgba()
+        full_img = np.asarray(buf)[..., :3]
+        bbox = mid_ax.get_position()
+        h, w = full_img.shape[:2]
+        x0, x1 = int(bbox.x0 * w), int(bbox.x1 * w)
+        y0, y1 = int((1 - bbox.y1) * h), int((1 - bbox.y0) * h)
+        slices[orientation] = full_img[y0:y1, x0:x1]
         plt.close(fig)
     except Exception as e:
         add_info_to_product(
@@ -205,7 +203,7 @@ except Exception as e:
             os.path.join('out_figs', 'source_space_thumb.png'),
             title='Source space'
         )
-report.save(os.path.join('out_dir_report', 'report.html'), overwrite=True)
+report.save(os.path.join('out_report', 'report.html'), overwrite=True)
 
 add_info_to_product(report_items, "Source space computation completed successfully.", "success")
 create_product_json(report_items)

@@ -14,7 +14,7 @@ The source space defines the candidate source locations on the cortical surface.
 
 | Datatype | File | Description |
 |----------|------|-------------|
-| `neuro/source-space` | `source_space-src.fif` | Source space (consumed by forward app) |
+| `neuro/source-space` | `src.fif` | Source space (consumed by forward app) |
 | `report/html` | `report.html` | Interactive MRI slider with source points overlaid |
 
 ## Parameters
@@ -30,7 +30,7 @@ The source space defines the candidate source locations on the cortical surface.
 ```
 app-freesurfer-v2
       │
-      └──→ app-source-space-v2  (source_space-src.fif)
+      └──→ app-source-space-v2  (src.fif)
                   │
                   └──→ app-forward-v2
 ```
@@ -42,3 +42,7 @@ app-freesurfer-v2
 `docker://brainlife/mne-freesurfer:7.3.2-1.2.1`
 
 Contains FreeSurfer 7.3.2 and MNE-Python 1.2.1.
+
+## Citations
+
+Hayashi, S., Caron, B.A., Heinsfeld, A.S. et al. brainlife.io: a decentralized and open-source cloud platform to support neuroscience research. Nat Methods 21, 809–813 (2024). https://doi.org/10.1038/s41592-024-02237-2
