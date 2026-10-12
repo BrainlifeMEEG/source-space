@@ -37,9 +37,11 @@ import matplotlib.pyplot as plt
 
 import mne
 
+mne.set_log_level('WARNING')
+
 # == SETUP ==
 ensure_output_dirs('out_dir', 'out_figs', 'out_report')
-report_items = []
+product_items = []
 
 # == LOAD CONFIG ==
 config = load_config()
@@ -58,25 +60,25 @@ if fs_path and os.path.isdir(fs_path):
 
 if not subjects_dir or not subject:
     add_info_to_product(
-        report_items,
+        product_items,
         "FATAL: No FreeSurfer directory found. "
         "Set 'freesurfer' in config.json to the subject's FreeSurfer directory.",
         "error"
     )
-    create_product_json(report_items)
+    create_product_json(product_items)
     sys.exit(1)
 
 if not os.path.isdir(os.path.join(subjects_dir, subject)):
     add_info_to_product(
-        report_items,
+        product_items,
         f"FATAL: FreeSurfer subject directory not found: "
         f"{os.path.join(subjects_dir, subject)}",
         "error"
     )
-    create_product_json(report_items)
+    create_product_json(product_items)
     sys.exit(1)
 
-add_info_to_product(report_items, f"Subject: {subject}", "info")
+add_info_to_product(product_items, f"Subject: {subject}", "info")
 
 # == PARAMETERS ==
 # spacing options:
@@ -106,7 +108,7 @@ else:
     add_dist = add_dist_raw  # 'patch' or other string passed directly
 
 add_info_to_product(
-    report_items,
+    product_items,
     f"Source space parameters: spacing={spacing} | surface={surface} | add_dist={add_dist}",
     "info"
 )
@@ -123,24 +125,24 @@ try:
     )
     n_sources = sum(s['nuse'] for s in src)
     add_info_to_product(
-        report_items,
+        product_items,
         f"Source space: {n_sources} sources total "
         f"({src[0]['nuse']} left + {src[1]['nuse']} right hemisphere)",
         "info"
     )
 except Exception as e:
-    add_info_to_product(report_items, f"FATAL: Source space setup failed: {e}", "error")
-    create_product_json(report_items)
+    add_info_to_product(product_items, f"FATAL: Source space setup failed: {e}", "error")
+    create_product_json(product_items)
     sys.exit(1)
 
 # == SAVE SOURCE SPACE ==
 src_path = os.path.join('out_dir', 'src.fif')
 try:
     mne.write_source_spaces(src_path, src, overwrite=True)
-    add_info_to_product(report_items, f"Saved: {src_path}", "info")
+    add_info_to_product(product_items, f"Saved: {src_path}", "info")
 except Exception as e:
-    add_info_to_product(report_items, f"FATAL: Could not save source space: {e}", "error")
-    create_product_json(report_items)
+    add_info_to_product(product_items, f"FATAL: Could not save source space: {e}", "error")
+    create_product_json(product_items)
     sys.exit(1)
 
 # == QC FIGURE — middle slice from all 3 orientations with source points overlaid ==
@@ -171,7 +173,7 @@ for orientation in ('coronal', 'axial', 'sagittal'):
         plt.close(fig)
     except Exception as e:
         add_info_to_product(
-            report_items, f"Could not plot source space ({orientation}): {e}", "warning"
+            product_items, f"Could not plot source space ({orientation}): {e}", "warning"
         )
 
 if slices:
@@ -186,7 +188,7 @@ if slices:
     thumb_path = os.path.join('out_figs', 'source_space_thumb.png')
     combined.savefig(thumb_path, dpi=100, bbox_inches='tight')
     plt.close(combined)
-    add_image_to_product(report_items, 'Source space — middle slice', filepath=thumb_path)
+    add_image_to_product(product_items, 'Source space — middle slice', filepath=thumb_path)
 
 # == SAVE REPORT — interactive slider ==
 report = mne.Report(title='Source Space Report')
@@ -197,7 +199,7 @@ try:
         decim=4, width=512
     )
 except Exception as e:
-    add_info_to_product(report_items, f"Could not add interactive view to report: {e}", "warning")
+    add_info_to_product(product_items, f"Could not add interactive view to report: {e}", "warning")
     if os.path.isfile(os.path.join('out_figs', 'source_space_thumb.png')):
         report.add_image(
             os.path.join('out_figs', 'source_space_thumb.png'),
@@ -205,6 +207,6 @@ except Exception as e:
         )
 report.save(os.path.join('out_report', 'report.html'), overwrite=True)
 
-add_info_to_product(report_items, "Source space computation completed successfully.", "success")
-create_product_json(report_items)
+add_info_to_product(product_items, "Source space computation completed successfully.", "success")
+create_product_json(product_items)
 print("Done.")
