@@ -65,6 +65,7 @@ if not subjects_dir or not subject:
         "Set 'freesurfer' in config.json to the subject's FreeSurfer directory.",
         "error"
     )
+    print(f"ERROR: {product_items[-1]['msg']}", file=sys.stderr)
     create_product_json(product_items)
     sys.exit(1)
 
@@ -75,6 +76,7 @@ if not os.path.isdir(os.path.join(subjects_dir, subject)):
         f"{os.path.join(subjects_dir, subject)}",
         "error"
     )
+    print(f"ERROR: {product_items[-1]['msg']}", file=sys.stderr)
     create_product_json(product_items)
     sys.exit(1)
 
@@ -132,6 +134,7 @@ try:
     )
 except Exception as e:
     add_info_to_product(product_items, f"FATAL: Source space setup failed: {e}", "error")
+    print(f"ERROR: {product_items[-1]['msg']}", file=sys.stderr)
     create_product_json(product_items)
     sys.exit(1)
 
@@ -142,6 +145,7 @@ try:
     add_info_to_product(product_items, f"Saved: {src_path}", "info")
 except Exception as e:
     add_info_to_product(product_items, f"FATAL: Could not save source space: {e}", "error")
+    print(f"ERROR: {product_items[-1]['msg']}", file=sys.stderr)
     create_product_json(product_items)
     sys.exit(1)
 
