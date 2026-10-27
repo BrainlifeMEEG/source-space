@@ -122,8 +122,7 @@ try:
         spacing=spacing,
         surface=surface,
         subjects_dir=subjects_dir,
-        add_dist=add_dist,
-        verbose=True
+        add_dist=add_dist
     )
     n_sources = sum(s['nuse'] for s in src)
     add_info_to_product(
@@ -142,6 +141,10 @@ except Exception as e:
 src_path = os.path.join('out_dir', 'src.fif')
 try:
     mne.write_source_spaces(src_path, src, overwrite=True)
+    # Spec requires the written file to load with its MNE reader before
+    # success is reported, so a truncated or corrupt write fails here
+    # rather than three apps downstream.
+    mne.read_source_spaces(src_path)
     add_info_to_product(product_items, f"Saved: {src_path}", "info")
 except Exception as e:
     add_info_to_product(product_items, f"FATAL: Could not save source space: {e}", "error")
@@ -209,7 +212,13 @@ except Exception as e:
             os.path.join('out_figs', 'source_space_thumb.png'),
             title='Source space'
         )
-report.save(os.path.join('out_report', 'report.html'), overwrite=True)
+# A failed report must not cost us product.json: the real output is
+# already on disk by this point, and an unguarded failure here would
+# exit with a bare traceback and no diagnostics at all.
+try:
+    report.save(os.path.join('out_report', 'report.html'), overwrite=True)
+except Exception as e:
+    add_info_to_product(product_items, f"Could not save HTML report: {e}", "warning")
 
 add_info_to_product(product_items, "Source space computation completed successfully.", "success")
 create_product_json(product_items)
