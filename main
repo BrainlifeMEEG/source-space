@@ -19,7 +19,7 @@ else
     echo "Please set FREESURFER_LICENSE or FS_LICENSE in resource environment" && exit 1
 fi
 
-singularity exec \
+singularity --silent exec \
   --pwd `pwd` \
   -B `pwd`/license.txt:/opt/freesurfer/license.txt \
   docker://brainlifemeeg/mne-freesurfer:1.12.1-7.4.1 \

@@ -1,0 +1,9 @@
+{
+    "freesurfer": "",
+    "output": "",
+    "subjects_dir": null,
+    "subject": null,
+    "spacing": "oct6",
+    "surface": "white",
+    "add_dist": "False"
+}
