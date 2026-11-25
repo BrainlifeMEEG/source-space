@@ -1,5 +1,48 @@
 # Surface Source Space
 
+<!-- brainlife-app:begin (generated from the App manifest; edit the manifest, not this block) -->
+
+> **Computes a cortical surface source space from a FreeSurfer reconstruction with MNE-Python setup_source_space and outputs src.fif with a QC report.**
+
+Places candidate dipole sources on the FreeSurfer white surface at the chosen spacing (e.g. oct6, 4098 sources per hemisphere) with mne.setup_source_space, optionally adding distance and patch information, and renders the source points on the MRI. Use it to prepare the source space for an MEG/EEG forward model. It needs a FreeSurfer recon-all subject directory and a FreeSurfer license.
+
+| | |
+|---|---|
+| 📥 **Inputs** | `neuro/freesurfer` |
+| 📤 **Outputs** | `raw` |
+| 🐳 **Container** | `brainlifemeeg/mne-freesurfer:1.12.1-7.4.1` |
+| ⚙️ **Resources** | 1 CPUs · 40 GB memory · 4 h walltime |
+| 🔑 **Requires** | `FREESURFER_LICENSE`, `FS_LICENSE` |
+| 🔗 **Run it** | [doi.org/10.25663/brainlife.app.900](https://doi.org/10.25663/brainlife.app.900) |
+
+#### 📥 Inputs
+
+| Input | Datatype | Required | Description |
+|---|---|---|---|
+| `freesurfer` | `neuro/freesurfer` | yes | FreeSurfer subject directory produced by recon-all. |
+
+#### 📤 Outputs
+
+| Output | Datatype | Description |
+|---|---|---|
+| `out_dir` | `raw` | Surface source space (src.fif) for use by forward-model Apps. |
+
+<details>
+<summary><b>⚙️ Parameters</b> (2)</summary>
+
+| Parameter | Type | Default | Description |
+|---|---|---|---|
+| `spacing` | string | `oct6` | Source density. Examples: oct6 = 4098 sources/hemisphere (recommended) oct5 = 1026 (faster) oct4 = 258 (testing only) ico5 = 10242 (high density) or a number like '10' for ~10mm grid spacing. |
+| `add_dist` | enum | `False` | Add distance and patch information to the source space. This takes some time so precomputing it is recommended. Can also be ‘patch’ to only compute patch information. Options: `False`, `True`, `patch`. |
+
+</details>
+
+📚 **References used by this App:**
+- Hayashi S, Caron BA, Heinsfeld AS, et al. brainlife.io: a decentralized and open-source cloud platform to support neuroscience research. Nat Methods 21:809-813 (2024). [doi:10.1038/s41592-024-02237-2](https://doi.org/10.1038/s41592-024-02237-2)
+- Gramfort A, et al. MEG and EEG data analysis with MNE-Python. Front Neurosci 7:267 (2013). [doi:10.3389/fnins.2013.00267](https://doi.org/10.3389/fnins.2013.00267)
+
+<!-- brainlife-app:end -->
+
 [![Run on Brainlife.io](https://img.shields.io/badge/Brainlife-bl.app.900-blue.svg)](https://doi.org/10.25663/brainlife.app.900)
 
 ## Description
