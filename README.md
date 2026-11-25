@@ -1,25 +1,78 @@
-# Surface Source Space
+<h1 align="center">Surface Source Space</h1>
 
-[![Run on Brainlife.io](https://img.shields.io/badge/Brainlife-bl.app.900-blue.svg)](https://doi.org/10.25663/brainlife.app.900)
+<p align="center">
+  Computes a cortical surface source space from a FreeSurfer reconstruction with MNE-Python setup_source_space and outputs src.fif with a QC report.
+</p>
 
-## Description
+<p align="center">
+  <a href="https://github.com/brainlife/abcd-spec"><img src="https://img.shields.io/badge/ABCD_Spec-v1.1-green.svg" alt="ABCD Spec v1.1"></a>
+  <a href="https://doi.org/10.25663/brainlife.app.900"><img src="https://img.shields.io/badge/Brainlife-brainlife.app.900-blue.svg" alt="Run on brainlife.io"></a>
+  <a href="LICENSE"><img src="https://img.shields.io/badge/License-see_LICENSE-lightgrey.svg" alt="License"></a>
+</p>
 
-Computes a surface-based source space from a FreeSurfer cortical reconstruction, using [`mne.setup_source_space`](https://mne.tools/stable/generated/mne.setup_source_space.html). The source space defines the candidate source locations (dipoles) on the cortical surface and is a required input for forward model computation.
+## At a glance
 
-The app generates:
-- The source space (`src.fif`)
-- A QC thumbnail with coronal/axial/sagittal views of the source points overlaid on the MRI
-- An interactive HTML report with an MRI slider showing the source points
+<!-- brainlife-app:begin (generated from the App manifest; edit the manifest, not this block) -->
 
-## Inputs
+> **Computes a cortical surface source space from a FreeSurfer reconstruction with MNE-Python setup_source_space and outputs src.fif with a QC report.**
 
-- **`output`** (`neuro/freesurfer`): FreeSurfer subject directory produced by `recon-all` (required). On Brainlife.io this is populated automatically from the upstream FreeSurfer app. For local testing, the subject directory path can instead be set directly under the `freesurfer` key in `config.json`; its parent directory is then used as `subjects_dir` and its directory name as `subject`.
+Places candidate dipole sources on the FreeSurfer white surface at the chosen spacing (e.g. oct6, 4098 sources per hemisphere) with mne.setup_source_space, optionally adding distance and patch information, and renders the source points on the MRI. Use it to prepare the source space for an MEG/EEG forward model. It needs a FreeSurfer recon-all subject directory and a FreeSurfer license.
 
-## Outputs
+| | |
+|---|---|
+| **Inputs** | `neuro/freesurfer` |
+| **Outputs** | `raw` |
+| **Container** | `brainlifemeeg/mne-freesurfer:1.12.1-7.4.1` |
+| **Resources** | 1 CPUs · 40 GB memory · 4 h walltime |
+| **Requires** | `FREESURFER_LICENSE`, `FS_LICENSE` |
+| **Run it** | [doi.org/10.25663/brainlife.app.900](https://doi.org/10.25663/brainlife.app.900) |
 
-- **`out_dir/src.fif`** (`raw`, tag `source_space`): the computed source space, consumed by the forward-model app.
-- **`out_figs/source_space_thumb.png`**: coronal/axial/sagittal thumbnail with source points overlaid on the MRI (embedded in `product.json`).
-- **`out_report/report.html`**: interactive MRI slider with the source space overlaid (falls back to the thumbnail image if the interactive view cannot be built).
+#### Inputs
+
+| Input | Datatype | Required | Description |
+|---|---|---|---|
+| `freesurfer` | `neuro/freesurfer` | yes | FreeSurfer subject directory produced by recon-all. |
+
+#### Outputs
+
+| Output | Datatype | Description |
+|---|---|---|
+| `out_dir` | `raw` | Surface source space (src.fif) for use by forward-model Apps. |
+
+<details>
+<summary><b>Parameters</b> (2)</summary>
+
+| Parameter | Type | Default | Description |
+|---|---|---|---|
+| `spacing` | string | `oct6` | Source density. Examples: oct6 = 4098 sources/hemisphere (recommended) oct5 = 1026 (faster) oct4 = 258 (testing only) ico5 = 10242 (high density) or a number like '10' for ~10mm grid spacing. |
+| `add_dist` | enum | `False` | Add distance and patch information to the source space. This takes some time so precomputing it is recommended. Can also be ‘patch’ to only compute patch information. Options: `False`, `True`, `patch`. |
+
+</details>
+
+<!-- brainlife-app:end -->
+
+## Running the App
+
+### On brainlife.io
+
+Open the App at [doi.org/10.25663/brainlife.app.900](https://doi.org/10.25663/brainlife.app.900), choose `neuro/freesurfer` from your project, set the parameters and press **Execute**. The results are saved to your project as `raw`.
+
+### Locally
+
+You need [Singularity/Apptainer](https://apptainer.org/) (the App runs in `brainlifemeeg/mne-freesurfer:1.12.1-7.4.1`), [`jq`](https://jqlang.github.io/jq/), `FREESURFER_LICENSE`, `FS_LICENSE`.
+
+1. Clone this repository.
+2. Create `config.json` with the paths to your inputs and the parameters:
+
+   ```json
+   {
+       "output": "/path/to/freesurfer/output",
+       "spacing": "oct6",
+       "add_dist": "False"
+   }
+   ```
+
+3. Run `./main`.
 
 ## Configuration Parameters
 
@@ -31,16 +84,7 @@ The app generates:
 | `subjects_dir` | string | derived from the `output`/`freesurfer` input path | Path to the FreeSurfer `SUBJECTS_DIR`. Only needed to override the value otherwise derived from the input path. |
 | `subject` | string | derived from the `output`/`freesurfer` input path | FreeSurfer subject name. Only needed to override the value otherwise derived from the input path. |
 
-## Usage
-
-### Running on Brainlife.io
-
-1. Select a FreeSurfer reconstruction (output of the FreeSurfer recon-all app) as the input.
-2. Optionally adjust `spacing` and `add_dist`.
-3. Submit the task.
-4. Review `src.fif` and the interactive report (source points overlaid on the MRI) in the output viewer.
-
-### Local Testing
+## Local Testing
 
 ```bash
 # Update config.json with the FreeSurfer subject directory and parameters
@@ -65,27 +109,40 @@ app-freesurfer-v2
 
 Contains FreeSurfer 7.4.1 and MNE-Python 1.12.1.
 
+## Citing
+
+If you use this App, please cite it, the software it builds on and brainlife.io:
+
+- Surface Source Space. brainlife.io App. [doi:10.25663/brainlife.app.900](https://doi.org/10.25663/brainlife.app.900)
+- Gramfort A, et al. MEG and EEG data analysis with MNE-Python. Front Neurosci 7:267 (2013). [doi:10.3389/fnins.2013.00267](https://doi.org/10.3389/fnins.2013.00267)
+- Fischl. FreeSurfer. *NeuroImage* 62:774-781 (2012). [doi:10.1016/j.neuroimage.2012.01.021](https://doi.org/10.1016/j.neuroimage.2012.01.021)
+- Hayashi S, Caron BA, Heinsfeld AS, et al. brainlife.io: a decentralized and open-source cloud platform to support neuroscience research. *Nature Methods* 21:809–813 (2024). [doi:10.1038/s41592-024-02237-2](https://doi.org/10.1038/s41592-024-02237-2)
+- Avesani P, McPherson B, Hayashi S, et al. The open diffusion data derivatives, brain data upcycling via integrated publishing of derivatives and reproducible open cloud services. *Scientific Data* 6:69 (2019). [doi:10.1038/s41597-019-0073-y](https://doi.org/10.1038/s41597-019-0073-y)
+
 ## Authors
 
 - [Maximilien Chaumon](https://github.com/dnacombo)
 - [obVdo](https://github.com/obVdo)
 
-## Citations
+## Funding
 
-- Hayashi, S., Caron, B.A., Heinsfeld, A.S. et al. brainlife.io: a decentralized and open-source cloud platform to support neuroscience research. Nat Methods 21, 809–813 (2024). https://doi.org/10.1038/s41592-024-02237-2
-- Gramfort, A. et al. MEG and EEG data analysis with MNE-Python. Front. Neurosci. 7, 267 (2013). https://doi.org/10.3389/fnins.2013.00267
+[![Wellcome-226486/Z/22/Z](https://img.shields.io/badge/Wellcome-226486%2FZ%2F22%2FZ-purple.svg)](https://wellcome.org/)
+[![NIH-NINDS-U24NS140384](https://img.shields.io/badge/NIH_NINDS-U24NS140384-green.svg)](https://reporter.nih.gov/project-details/11261037)
+[![NIH-NINDS-UM1NS132207](https://img.shields.io/badge/NIH_NINDS-UM1NS132207-green.svg)](https://reporter.nih.gov/project-details/11411328)
+[![NIH-NIBIB-R01EB029272](https://img.shields.io/badge/NIH_NIBIB-R01EB029272-green.svg)](https://reporter.nih.gov/project-details/10262925)
+[![NIH-NIBIB-R01EB030896](https://img.shields.io/badge/NIH_NIBIB-R01EB030896-green.svg)](https://reporter.nih.gov/project-details/10428625)
+[![NIH-NIMH-R01MH126699](https://img.shields.io/badge/NIH_NIMH-R01MH126699-green.svg)](https://reporter.nih.gov/project-details/10460628)
+[![NIH-NIDCD-R01DC020088](https://img.shields.io/badge/NIH_NIDCD-R01DC020088-green.svg)](https://reporter.nih.gov/project-details/11140284)
+[![NSF-BCS-1734853](https://img.shields.io/badge/NSF_BCS-1734853-blue.svg)](https://www.nsf.gov/awardsearch/showAward?AWD_ID=1734853)
+[![NSF-BCS-2203524](https://img.shields.io/badge/NSF_BCS-2203524-blue.svg)](https://www.nsf.gov/awardsearch/showAward?AWD_ID=2203524)
+[![NSF-IIS-1636893](https://img.shields.io/badge/NSF_IIS-1636893-blue.svg)](https://www.nsf.gov/awardsearch/showAward?AWD_ID=1636893)
+[![NSF-OAC-2148729](https://img.shields.io/badge/NSF_OAC-2148729-blue.svg)](https://www.nsf.gov/awardsearch/showAward?AWD_ID=2148729)
+[![NSF-IIS-1912270](https://img.shields.io/badge/NSF_IIS-1912270-blue.svg)](https://www.nsf.gov/awardsearch/showAward?AWD_ID=1912270)
+[![NSF-IIS-2148700](https://img.shields.io/badge/NSF_IIS-2148700-blue.svg)](https://www.nsf.gov/awardsearch/showAward?AWD_ID=2148700)
+[![NSF-OAC-1916518](https://img.shields.io/badge/NSF_OAC-1916518-blue.svg)](https://www.nsf.gov/awardsearch/showAward?AWD_ID=1916518)
 
-## Funding Acknowledgement
-
-brainlife.io is publicly funded. We kindly ask that you acknowledge the funding below in your code and publications.
-
-[![NSF-BCS-1734853](https://img.shields.io/badge/NSF_BCS-1734853-blue.svg)](https://nsf.gov/awardsearch/showAward?AWD_ID=1734853)
-[![NSF-BCS-1636893](https://img.shields.io/badge/NSF_BCS-1636893-blue.svg)](https://nsf.gov/awardsearch/showAward?AWD_ID=1636893)
-[![NSF-ACI-1916518](https://img.shields.io/badge/NSF_ACI-1916518-blue.svg)](https://nsf.gov/awardsearch/showAward?AWD_ID=1916518)
-[![NSF-IIS-1912270](https://img.shields.io/badge/NSF_IIS-1912270-blue.svg)](https://nsf.gov/awardsearch/showAward?AWD_ID=1912270)
-[![NIH-NIBIB-R01EB029272](https://img.shields.io/badge/NIH_NIBIB-R01EB029272-green.svg)](https://grantome.com/grant/NIH/R01-EB029272-01)
-[![NIH-NIBIB-R01EB030896](https://img.shields.io/badge/NIH_NIBIB-R01EB030896-green.svg)](https://grantome.com/grant/NIH/R01-EB030896-01)
+<sub>brainlife.io, which runs this App, is publicly funded by Wellcome, the U.S. National Institutes of Health and the U.S. National Science Foundation; acknowledging that support helps keep it running.</sub>
 
 ## License
 
-Copyright (c) 2026 MEEG Brainlife team. Licensed under AGPL-3.0, see [license.txt](license.txt).
+See [LICENSE](LICENSE).
